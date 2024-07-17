@@ -527,7 +527,7 @@ body {
 }
 
 @media (min-width: 768px) {
-  .jobsFilterSide{
+  .jobsFilterSide {
     max-width: 25%;
   }
   .failImg {

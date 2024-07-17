@@ -43,14 +43,15 @@ class JobItem extends Component {
         similarJobs: data.similar_jobs,
       }
       const {jobDetails, similarJobs} = updatedData
-      const {skills, life_at_company} = jobDetails
+      const lifeAtCompany = jobDetails.life_at_company
+      const {skills} = jobDetails
       const updatedSkills = skills.map(eachSkill => ({
         imageUrl: eachSkill.image_url,
         name: eachSkill.name,
       }))
       const updatedLifeAtCompany = {
-        description: life_at_company.description,
-        imageUrl: life_at_company.image_url,
+        description: lifeAtCompany.description,
+        imageUrl: lifeAtCompany.image_url,
       }
       const updatedJobDetailsObj = {
         title: jobDetails.title,
@@ -74,7 +75,6 @@ class JobItem extends Component {
         rating: eachJob.rating,
         title: eachJob.title,
       }))
-      console.log(updatedJobDetailsObj)
       this.setState({
         jobDetailsApiStatus: apiStatusConstants.success,
         jobDetailsObj: updatedJobDetailsObj,

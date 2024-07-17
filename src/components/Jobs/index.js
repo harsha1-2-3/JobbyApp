@@ -42,7 +42,28 @@ const salaryRangesList = [
     label: '40 LPA and above',
   },
 ]
-
+const locationsList = [
+  {
+    locationId: 'HYDERABAD',
+    label: 'Hyderabad',
+  },
+  {
+    locationId: 'BANGALORE',
+    label: 'Bangalore',
+  },
+  {
+    locationId: 'CHENNAI',
+    label: 'Chennai',
+  },
+  {
+    locationId: 'DELHI',
+    label: 'Delhi',
+  },
+  {
+    locationId: 'MUMBAI',
+    label: 'Mumbai',
+  },
+]
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
@@ -60,6 +81,7 @@ class Jobs extends Component {
     profileApiStatus: apiStatusConstants.initial,
     jobsApiStatus: apiStatusConstants.initial,
     checkedItems: [],
+    activeLocation: [],
   }
 
   componentDidMount() {
@@ -73,21 +95,35 @@ class Jobs extends Component {
 
   onChangeEmploymentType = event => {
     const {checkedItems} = this.state
-    if (event.target.checked) {
-      const updatedEmployeeType = [...checkedItems, event.target.value].join(
-        ',',
-      )
-      this.setState({activeEmployeeType: updatedEmployeeType}, this.getJobsList)
+    let updatedEmployeeType
+    if (
+      event.target.checked &&
+      checkedItems.includes(event.target.value) === false
+    ) {
+      updatedEmployeeType = [...checkedItems, event.target.value]
     } else {
-      const normalChecked = checkedItems
-        .filter(item => item !== event.target.value)
-        .join(',')
-      this.setState({activeEmployeeType: normalChecked}, this.getJobsList)
+      updatedEmployeeType = checkedItems.filter(
+        item => item !== event.target.value,
+      )
     }
+    this.setState({activeEmployeeType: updatedEmployeeType}, this.getJobsList)
   }
 
   onChangeSalaryRange = event => {
     this.setState({activeSalaryRange: event.target.value}, this.getJobsList)
+  }
+
+  onChangeLocation = event => {
+    const {checkedItems} = this.state
+    if (event.target.checked) {
+      const updatedLocation = [...checkedItems, event.target.value].join(',')
+      this.setState({activeLocation: updatedLocation}, this.getJobsList)
+    } else {
+      const normalChecked = checkedItems
+        .filter(item => item !== event.target.value)
+        .join(',')
+      this.setState({activeLocation: normalChecked}, this.getJobsList)
+    }
   }
 
   clickedSearch = () => {
@@ -132,8 +168,13 @@ class Jobs extends Component {
 
   getJobsList = async () => {
     this.setState({jobsApiStatus: apiStatusConstants.loading})
-    const {searchInput, activeSalaryRange, activeEmployeeType} = this.state
-    const url = `https://apis.ccbp.in/jobs?employment_type=${activeEmployeeType}&minimum_package=${activeSalaryRange}&search=${searchInput}`
+    const {
+      searchInput,
+      activeSalaryRange,
+      activeEmployeeType,
+      activeLocation,
+    } = this.state
+    const url = `https://apis.ccbp.in/jobs?employment_type=${activeEmployeeType}&minimum_package=${activeSalaryRange}&location=${activeLocation}&search=${searchInput}`
     const jwtToken = Cookies.get('jwt_token')
     const options = {
       method: 'GET',
@@ -141,6 +182,7 @@ class Jobs extends Component {
         Authorization: `Bearer ${jwtToken}`,
       },
     }
+    console.log(activeEmployeeType)
     const response = await fetch(url, options)
     if (response.ok === true) {
       const data = await response.json()
@@ -187,7 +229,7 @@ class Jobs extends Component {
         />
         <h1 className="noJobsHead">No Jobs Found</h1>
         <p className="noJobsPara">
-          We cannot not find any jobs. Try other filters
+          We could not find any jobs. Try other filters
         </p>
       </div>
     </div>
@@ -196,7 +238,6 @@ class Jobs extends Component {
   renderSuccessProfile = () => {
     const {profileObj} = this.state
     const {name, profileImageUrl, shortBio} = profileObj
-    console.log(profileObj)
 
     return (
       <div className="profileCont">
@@ -221,7 +262,6 @@ class Jobs extends Component {
 
   renderSuccessJobs = () => {
     const {jobsList} = this.state
-    console.log(jobsList)
 
     return (
       <>
@@ -348,7 +388,7 @@ class Jobs extends Component {
   }
 
   render() {
-    const {checkedItems, searchInput} = this.state
+    const {searchInput} = this.state
 
     return (
       <div className="bgJobs">
@@ -386,13 +426,13 @@ class Jobs extends Component {
                       value={eachType.employmentTypeId}
                       name="employmentType"
                       onChange={this.onChangeEmploymentType}
-                      id={`${eachType.employmentTypeId}`}
+                      id={eachType.employmentTypeId}
                       className="filterInput"
                       type="checkbox"
                     />
                     <label
                       className="filterLabel"
-                      htmlFor={`${eachType.employmentTypeId}`}
+                      htmlFor={eachType.employmentTypeId}
                     >
                       {eachType.label}
                     </label>
@@ -418,6 +458,26 @@ class Jobs extends Component {
                       htmlFor={`${eachRange.salaryRangeId}`}
                     >
                       {eachRange.label}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="filtersCont">
+              <h1 className="filterHead">Desired Location</h1>
+              <ul className="filterUl">
+                {locationsList.map(each => (
+                  <li key={each.locationId} className="filterLi">
+                    <input
+                      onChange={this.onChangeLocation}
+                      id={each.locationId}
+                      className="filterInput"
+                      type="checkbox"
+                      value={each.locationId}
+                    />
+                    <label className="filterLabel" htmlFor={each.locationId}>
+                      {each.label}
                     </label>
                   </li>
                 ))}
